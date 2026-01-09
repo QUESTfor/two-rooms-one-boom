@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Rooms and a Boom - 主持人介面</title>
+    <style>
+        /* ## 全域樣式設定 - 設定整體頁面的基本外觀 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ## 主容器樣式 - 包含整個遊戲介面的容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ## 標題區域樣式 */
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        /* ## 控制面板樣式 - 包含初始化和計時器的控制按鈕 */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .controls button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-init {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-init:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .btn-reset {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #da190b;
+            transform: scale(1.05);
+        }
+
+        /* ## 賭徒賭注選擇器樣式 */
+        .gambler-bet {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #9E9E9E;
+        }
+
+        .gambler-bet label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .gambler-bet select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .gambler-bet select:focus {
+            outline: none;
+            border-color: #9E9E9E;
+        }
+
+        /* ## 計時器樣式 - 顯示當前回合時間 */
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* ## 統計面板樣式 - 顯示遊戲狀態統計 */
+        .stats {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stats h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #2196F3;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* ## 遊戲狀態行樣式 - 顯示勝負條件和卡片分享狀態 */
+        .game-status-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #FF9800;
+        }
+
+        .status-card.win {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .status-card.lose {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+
+        .status-card.neutral {
+            border-left-color: #9E9E9E;
+            background: #f5f5f5;
+        }
+
+        .status-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .status-content {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* ## 卡片分享狀態行樣式 */
+        .card-share-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .share-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid #2196F3;
+        }
+
+        .share-card.blue-team {
+            border-left-color: #2196F3;
+        }
+
+        .share-card.red-team {
+            border-left-color: #f44336;
+        }
+
+        .share-info {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .share-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .share-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .share-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+
+        .share-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .share-toggle input:checked + .share-slider {
+            background-color: #4CAF50;
+        }
+
+        .share-toggle input:checked + .share-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* ## 房間容器樣式 - 包含兩個房間的主要區域 */
+        .rooms-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* ## 單一房間樣式 - 每個房間的外觀設定 */
+        .room {
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .room-a h2 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .room-b h2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* ## 玩家列表容器 - 可滾動的玩家卡片區域 */
+        .players-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        /* ## 玩家卡片樣式 - 顯示每個玩家的資訊卡 */
+        .player-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            padding-right: 80px; /* 為刪除按鈕預留空間 */
+            margin-bottom: 10px;
+            cursor: move;
+            border-left: 5px solid #ccc;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .player-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .player-card.dragging {
+            opacity: 0.5;
+        }
+
+        /* ## 玩家資訊樣式 - 姓名、角色的顯示 */
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 100%; /* 限制最大寬度 */
+            padding-right: 5px; /* 額外的安全邊距 */
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 18px;
+            flex: 1;
+            min-width: 80px; /* 減少最小寬度 */
+            max-width: calc(100% - 120px); /* 確保不會超出到刪除按鈕區域 */
+            word-break: break-word; /* 長名字會換行 */
+        }
+
+        .player-role {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* ## 隊伍顏色樣式 - 紅隊、藍隊、中立的顏色標示（僅用於角色背景） */
+        .team-blue {
+            background: #2196F3;
+            color: white;
+        }
+
+        .team-red {
+            background: #f44336;
+            color: white;
+        }
+
+        .team-neutral {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        /* ## 刪除按鈕樣式 */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 10; /* 確保刪除按鈕在最上層 */
+            white-space: nowrap; /* 防止文字換行 */
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        /* ## 編輯模式樣式 */
+        .edit-mode {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            max-width: 100%;
+            padding-right: 5px; /* 確保不會延伸到刪除按鈕 */
+        }
+
+        .edit-mode input {
+            padding: 8px;
+            border: 2px solid #2196F3;
+            border-radius: 5px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 100px; /* 減少最小寬度 */
+            max-width: 100%; /* 確保不超出 */
+        }
+
+        .edit-mode select {
+            padding: 8px;
+            border: 2px solid #2196F3;
+            border-radius: 5px;
+            font-size: 14px;
+            max-width: 100%; /* 確保不超出 */
+        }
+
+        .edit-mode button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #45a049;
+        }
+
+        .cancel-btn {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #757575;
+        }
+
+        /* ## 新增玩家按鈕樣式 */
+        .add-player-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .add-player-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ## Firebase連線狀態指示器 */
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .status-connected {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-disconnected {
+            background: #f44336;
+            color: white;
+        }
+
+        /* ## 響應式設計 - 手機和平板優化 */
+        @media (max-width: 768px) {
+            .rooms-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-status-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-share-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ## Firebase SDK 載入 - 載入Firebase所需的JavaScript函式庫 -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- ## 連線狀態指示器 - 顯示Firebase連線狀態 -->
+    <div class="connection-status status-disconnected" id="connectionStatus">
+        🔴 未連線
+    </div>
+
+    <!-- ## 主容器 - 包含整個應用程式介面 -->
+    <div class="container">
+        <h1>🎮 Two Rooms and a Boom</h1>
+        <p class="subtitle">主持人控制介面 - 泰北華校版</p>
+
+        <!-- ## 控制面板 - 遊戲初始化和重置按鈕 -->
+        <div class="controls">
+            <button class="btn-init" onclick="initializeGame()">🎲 初始化遊戲 (隨機分配35人)</button>
+            
+            <!-- 賭徒賭注選擇器 -->
+            <div class="gambler-bet">
+                <label>🎰 賭徒賭注:</label>
+                <select id="gamblerBet" onchange="updateGamblerBet()">
+                    <option value="">未選擇</option>
+                    <option value="blue">藍隊</option>
+                    <option value="red">紅隊</option>
+                </select>
+            </div>
+            
+            <div class="timer" id="timer">⏱️ 00:00</div>
+            <button class="btn-reset" onclick="resetGame()">🔄 重置遊戲</button>
+        </div>
+
+        <!-- ## 統計面板 - 顯示遊戲當前狀態 -->
+        <div class="stats">
+            <h3>📊 遊戲狀態</h3>
+            
+            <!-- 基本統計 -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">房間 A 人數</div>
+                    <div class="stat-value" id="roomACount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">房間 B 人數</div>
+                    <div class="stat-value" id="roomBCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">總玩家數</div>
+                    <div class="stat-value" id="totalCount">0</div>
+                </div>
+            </div>
+
+            <!-- 勝負判定狀態 -->
+            <div class="game-status-row">
+                <div class="status-card" id="presidentLocation">
+                    <div class="status-title">總統位置</div>
+                    <div class="status-content">-</div>
+                </div>
+                <div class="status-card" id="bomberLocation">
+                    <div class="status-title">炸彈客位置</div>
+                    <div class="status-content">-</div>
+                </div>
+                <div class="status-card" id="gameResult">
+                    <div class="status-title">🏆 遊戲結果</div>
+                    <div class="status-content">進行中</div>
+                </div>
+            </div>
+
+            <!-- 卡片分享狀態 -->
+            <div class="card-share-row">
+                <div class="share-card blue-team">
+                    <span class="share-info">💙 總統 ↔️ 醫生 分享卡片</span>
+                    <label class="share-toggle">
+                        <input type="checkbox" id="blueCardShare" onchange="updateCardShare('blue')">
+                        <span class="share-slider"></span>
+                    </label>
+                </div>
+                <div class="share-card red-team">
+                    <span class="share-info">❤️ 炸彈客 ↔️ 工程師 分享卡片</span>
+                    <label class="share-toggle">
+                        <input type="checkbox" id="redCardShare" onchange="updateCardShare('red')">
+                        <span class="share-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ## 房間容器 - 包含兩個可拖曳的房間區域 -->
+        <div class="rooms-container">
+            <!-- 房間 A -->
+            <div class="room room-a" id="roomA" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>🏠 房間 A</h2>
+                <div class="players-list" id="roomAPlayers"></div>
+                <button class="add-player-btn" onclick="addNewPlayer('A')">➕ 新增玩家到房間 A</button>
+            </div>
+
+            <!-- 房間 B -->
+            <div class="room room-b" id="roomB" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>🏠 房間 B</h2>
+                <div class="players-list" id="roomBPlayers"></div>
+                <button class="add-player-btn" onclick="addNewPlayer('B')">➕ 新增玩家到房間 B</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ## Firebase 配置設定 - 使用你提供的Firebase專案配置 */
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZyqwvoU0qi9ar77seg4jNha44yhkWPcs",
+            authDomain: "tworoom-432ac.firebaseapp.com",
+            databaseURL: "https://tworoom-432ac-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tworoom-432ac",
+            storageBucket: "tworoom-432ac.firebasestorage.app",
+            messagingSenderId: "668064690288",
+            appId: "1:668064690288:web:6c1824112f623dc67784b5"
+        };
+
+        /* ## Firebase 初始化 - 初始化Firebase應用程式和資料庫連線 */
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const playersRef = database.ref('twoRoomsBoom/players');
+        const gameStateRef = database.ref('twoRoomsBoom/gameState');
+
+        /* ## 真實玩家名單 - 從圖片中的35位玩家 */
+        const PLAYER_NAMES = [
+            "羅沛薰", "波倩珊", "雷忠富",
+            "李美玲", "李玉茹", "張美玲",
+            "周喜美", "廖明青", "羅家蕊",
+            "趙文魁", "羅燕燕", "黃忠翔",
+            "張德榮", "趙光龍", "廖明珍",
+            "周韻如", "李忠勝", "盤進廣",
+            "周學銀", "鄧明福", "李忠蘭",
+            "央瑞榮", "周文福", "姜貴依",
+            "黃宗杉", "龔露熙", "李彩乖",
+            "藍秋燕", "方勇強", "張敏敏",
+            "盤仁皓", "盤進祝", "周學敏",
+            "馮壽豐", "白雪鷹"
+        ];
+
+        /* ## 遊戲腳色定義 - 定義所有可能的角色和隊伍 */
+        const ROLES = {
+            president: { name: '總統', team: 'blue' },
+            doctor: { name: '醫生', team: 'blue' },
+            bomber: { name: '炸彈客', team: 'red' },
+            engineer: { name: '工程師', team: 'red' },
+            gambler: { name: '賭徒', team: 'neutral' },
+            blueMember: { name: '藍隊成員', team: 'blue' },
+            redMember: { name: '紅隊成員', team: 'red' },
+            blueLeader: { name: '藍隊領導者', team: 'blue' },
+            redLeader: { name: '紅隊領導者', team: 'red' }
+        };
+
+        const TEAMS = {
+            blue: '藍隊',
+            red: '紅隊',
+            neutral: '中立'
+        };
+
+        /* ## 計時器變數 - 用於追蹤遊戲時間 */
+        let timerInterval = null;
+        let startTime = null;
+
+        /* ## Firebase 連線狀態監聽 - 監控資料庫連線狀態 */
+        const connectedRef = database.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            const statusEl = document.getElementById('connectionStatus');
+            if (snap.val() === true) {
+                statusEl.textContent = '🟢 已連線';
+                statusEl.className = 'connection-status status-connected';
+            } else {
+                statusEl.textContent = '🔴 未連線';
+                statusEl.className = 'connection-status status-disconnected';
+            }
+        });
+
+        /* ## 初始化遊戲函數 - 創建35位玩家並隨機分配腳色和房間 */
+        function initializeGame() {
+            if (!confirm('確定要初始化遊戲？這將為35位玩家隨機分配角色和房間。')) {
+                return;
+            }
+
+            const players = {};
+            
+            // 定義角色分配 (35人版本)
+            const roles = [
+                'president',    // 1位總統
+                'doctor',       // 1位醫生
+                'bomber',       // 1位炸彈客
+                'engineer',     // 1位工程師
+                'gambler',      // 1位賭徒
+                'blueLeader',   // 1位藍隊領導者
+                'redLeader'     // 1位紅隊領導者
+            ];
+
+            // 添加14個藍隊成員
+            for (let i = 0; i < 14; i++) {
+                roles.push('blueMember');
+            }
+
+            // 添加14個紅隊成員
+            for (let i = 0; i < 14; i++) {
+                roles.push('redMember');
+            }
+
+            // 洗牌算法 - 隨機排列角色
+            for (let i = roles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [roles[i], roles[j]] = [roles[j], roles[i]];
+            }
+
+            // 創建玩家並分配到房間
+            const rooms = ['A', 'B'];
+            for (let i = 0; i < 35; i++) {
+                const playerId = `player${i + 1}`;
+                const role = roles[i];
+                const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+                
+                players[playerId] = {
+                    id: playerId,
+                    name: PLAYER_NAMES[i],
+                    role: role,
+                    team: ROLES[role].team,
+                    room: randomRoom
+                };
+            }
+
+            // 上傳到Firebase
+            playersRef.set(players);
+            
+            // 初始化遊戲狀態
+            gameStateRef.set({
+                initialized: true,
+                startTime: Date.now(),
+                currentRound: 1,
+                totalPlayers: 35,
+                blueCardShared: false,
+                redCardShared: false,
+                gamblerBet: ''
+            });
+
+            // 啟動計時器
+            startTimer();
+            
+            alert('遊戲初始化完成！35位玩家已隨機分配角色和房間。');
+        }
+
+        /* ## 重置遊戲函數 - 清空所有玩家資料 */
+        function resetGame() {
+            if (!confirm('確定要重置遊戲？所有資料將被清空。')) {
+                return;
+            }
+
+            playersRef.remove();
+            gameStateRef.remove();
+            stopTimer();
+            
+            document.getElementById('roomAPlayers').innerHTML = '';
+            document.getElementById('roomBPlayers').innerHTML = '';
+            document.getElementById('blueCardShare').checked = false;
+            document.getElementById('redCardShare').checked = false;
+            document.getElementById('gamblerBet').value = '';
+            updateStats();
+            updateGameStatus();
+            
+            alert('遊戲已重置！');
+        }
+
+        /* ## 計時器控制函數 - 開始和停止遊戲計時器 */
+        function startTimer() {
+            stopTimer();
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            document.getElementById('timer').textContent = 
+                `⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        /* ## 賭徒賭注更新函數 - 更新賭徒的賭注選擇 */
+        function updateGamblerBet() {
+            const bet = document.getElementById('gamblerBet').value;
+            gameStateRef.update({ gamblerBet: bet });
+        }
+
+        /* ## 卡片分享狀態更新函數 - 更新卡片分享狀態 */
+        function updateCardShare(team) {
+            if (team === 'blue') {
+                const shared = document.getElementById('blueCardShare').checked;
+                gameStateRef.update({ blueCardShared: shared });
+            } else if (team === 'red') {
+                const shared = document.getElementById('redCardShare').checked;
+                gameStateRef.update({ redCardShared: shared });
+            }
+            updateGameStatus();
+        }
+
+        /* ## 拖曳功能 - 允許在房間之間拖曳玩家 */
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("playerId", ev.target.dataset.playerId);
+            ev.target.classList.add('dragging');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            
+            // 移除所有拖曳樣式
+            document.querySelectorAll('.player-card').forEach(card => {
+                card.classList.remove('dragging');
+            });
+            
+            const playerId = ev.dataTransfer.getData("playerId");
+            const targetRoom = ev.currentTarget.id === 'roomA' ? 'A' : 'B';
+            
+            // 更新Firebase中的房間資料
+            playersRef.child(playerId).update({ room: targetRoom });
+        }
+
+        /* ## 雙擊編輯玩家函數 - 雙擊卡片進入編輯模式 */
+        function editPlayerOnDoubleClick(playerId) {
+            playersRef.child(playerId).once('value', (snapshot) => {
+                const player = snapshot.val();
+                const card = document.querySelector(`[data-player-id="${playerId}"]`);
+                
+                // 找到player-info區域並保存原始內容
+                const playerInfoDiv = card.querySelector('.player-info');
+                if (!playerInfoDiv) return;
+                
+                card.dataset.originalContent = playerInfoDiv.innerHTML;
+                
+                const editHTML = `
+                    <input type="text" id="edit-name-${playerId}" value="${player.name}" placeholder="姓名" style="width: 100%; max-width: 150px;">
+                    <select id="edit-role-${playerId}" style="flex-shrink: 0;">
+                        <option value="president" ${player.role === 'president' ? 'selected' : ''}>總統</option>
+                        <option value="doctor" ${player.role === 'doctor' ? 'selected' : ''}>醫生</option>
+                        <option value="bomber" ${player.role === 'bomber' ? 'selected' : ''}>炸彈客</option>
+                        <option value="engineer" ${player.role === 'engineer' ? 'selected' : ''}>工程師</option>
+                        <option value="gambler" ${player.role === 'gambler' ? 'selected' : ''}>賭徒</option>
+                        <option value="blueMember" ${player.role === 'blueMember' ? 'selected' : ''}>藍隊成員</option>
+                        <option value="redMember" ${player.role === 'redMember' ? 'selected' : ''}>紅隊成員</option>
+                        <option value="blueLeader" ${player.role === 'blueLeader' ? 'selected' : ''}>藍隊領導者</option>
+                        <option value="redLeader" ${player.role === 'redLeader' ? 'selected' : ''}>紅隊領導者</option>
+                    </select>
+                    <button class="save-btn" onclick="savePlayer('${playerId}')" style="flex-shrink: 0;">💾</button>
+                    <button class="cancel-btn" onclick="cancelEdit('${playerId}')" style="flex-shrink: 0;">❌</button>
+                `;
+                
+                playerInfoDiv.innerHTML = editHTML;
+                playerInfoDiv.className = 'edit-mode';
+                card.draggable = false;
+            });
+        }
+
+        /* ## 儲存編輯函數 - 將修改後的玩家資料儲存到Firebase */
+        function savePlayer(playerId) {
+            const name = document.getElementById(`edit-name-${playerId}`).value;
+            const role = document.getElementById(`edit-role-${playerId}`).value;
+            const team = ROLES[role].team;
+            
+            playersRef.child(playerId).update({
+                name: name,
+                role: role,
+                team: team
+            });
+        }
+
+        /* ## 取消編輯函數 - 恢復原始顯示 */
+        function cancelEdit(playerId) {
+            const card = document.querySelector(`[data-player-id="${playerId}"]`);
+            const playerInfoDiv = card.querySelector('.edit-mode');
+            
+            if (card.dataset.originalContent && playerInfoDiv) {
+                playerInfoDiv.innerHTML = card.dataset.originalContent;
+                playerInfoDiv.className = 'player-info';
+                card.draggable = true;
+                delete card.dataset.originalContent;
+            } else {
+                // 如果找不到原始內容，重新渲染整個頁面
+                renderPlayers();
+            }
+        }
+
+        /* ## 刪除玩家函數 - 從資料庫中刪除玩家 */
+        function deletePlayer(playerId) {
+            if (confirm('確定要刪除這位玩家嗎？')) {
+                playersRef.child(playerId).remove();
+            }
+        }
+
+        /* ## 新增玩家函數 - 在指定房間新增玩家 */
+        function addNewPlayer(room) {
+            const playerName = prompt('請輸入玩家姓名：');
+            if (!playerName || playerName.trim() === '') {
+                return;
+            }
+
+            // 生成新的玩家ID
+            const newPlayerId = 'player' + Date.now();
+            
+            playersRef.child(newPlayerId).set({
+                id: newPlayerId,
+                name: playerName.trim(),
+                role: 'blueMember',
+                team: 'blue',
+                room: room
+            });
+
+            alert(`玩家「${playerName}」已加入房間 ${room}！`);
+        }
+
+        /* ## 渲染玩家卡片函數 - 顯示所有玩家在對應的房間中 */
+        function renderPlayers() {
+            playersRef.once('value', (snapshot) => {
+                const players = snapshot.val();
+                const roomAContainer = document.getElementById('roomAPlayers');
+                const roomBContainer = document.getElementById('roomBPlayers');
+                
+                roomAContainer.innerHTML = '';
+                roomBContainer.innerHTML = '';
+                
+                if (!players) {
+                    updateStats();
+                    updateGameStatus();
+                    return;
+                }
+                
+                Object.values(players).forEach(player => {
+                    const card = createPlayerCard(player);
+                    
+                    if (player.room === 'A') {
+                        roomAContainer.appendChild(card);
+                    } else {
+                        roomBContainer.appendChild(card);
+                    }
+                });
+                
+                updateStats();
+                updateGameStatus();
+            });
+        }
+
+        /* ## 創建玩家卡片函數 - 生成單一玩家的HTML卡片元素 */
+        function createPlayerCard(player) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.draggable = true;
+            card.dataset.playerId = player.id;
+            card.ondragstart = drag;
+            card.ondblclick = () => editPlayerOnDoubleClick(player.id);
+            
+            const teamClass = `team-${player.team}`;
+            const roleName = ROLES[player.role]?.name || player.role;
+            
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deletePlayer('${player.id}'); event.stopPropagation();">🗑️ 刪除</button>
+                <div class="player-info">
+                    <span class="player-name">${player.name}</span>
+                    <span class="player-role ${teamClass}">${roleName}</span>
+                </div>
+            `;
+            
+            // 根據隊伍設定邊框顏色
+            if (player.team === 'blue') {
+                card.style.borderLeftColor = '#2196F3';
+            } else if (player.team === 'red') {
+                card.style.borderLeftColor = '#f44336';
+            } else {
+                card.style.borderLeftColor = '#9E9E9E';
+            }
+            
+            return card;
+        }
+
+        /* ## 更新統計資訊函數 - 計算並顯示各房間人數 */
+        function updateStats() {
+            playersRef.once('value', (snapshot) => {
+                const players = snapshot.val();
+                
+                if (!players) {
+                    document.getElementById('roomACount').textContent = '0';
+                    document.getElementById('roomBCount').textContent = '0';
+                    document.getElementById('totalCount').textContent = '0';
+                    return;
+                }
+                
+                const roomACounts = Object.values(players).filter(p => p.room === 'A').length;
+                const roomBCounts = Object.values(players).filter(p => p.room === 'B').length;
+                
+                document.getElementById('roomACount').textContent = roomACounts;
+                document.getElementById('roomBCount').textContent = roomBCounts;
+                document.getElementById('totalCount').textContent = Object.keys(players).length;
+            });
+        }
+
+        /* ## 更新遊戲狀態函數 - 顯示總統和炸彈客位置，判定勝負 */
+        function updateGameStatus() {
+            playersRef.once('value', (snapshot) => {
+                const players = snapshot.val();
+                
+                if (!players) {
+                    document.getElementById('presidentLocation').innerHTML = '<div class="status-title">總統位置</div><div class="status-content">-</div>';
+                    document.getElementById('bomberLocation').innerHTML = '<div class="status-title">炸彈客位置</div><div class="status-content">-</div>';
+                    document.getElementById('gameResult').innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">未開始</div>';
+                    return;
+                }
+
+                // 找出總統和炸彈客
+                const president = Object.values(players).find(p => p.role === 'president');
+                const bomber = Object.values(players).find(p => p.role === 'bomber');
+
+                // 更新位置顯示
+                const presidentCard = document.getElementById('presidentLocation');
+                const bomberCard = document.getElementById('bomberLocation');
+                const resultCard = document.getElementById('gameResult');
+
+                if (president) {
+                    presidentCard.innerHTML = `<div class="status-title">總統位置</div><div class="status-content">房間 ${president.room}</div>`;
+                    presidentCard.className = 'status-card';
+                } else {
+                    presidentCard.innerHTML = '<div class="status-title">總統位置</div><div class="status-content">未找到</div>';
+                    presidentCard.className = 'status-card neutral';
+                }
+
+                if (bomber) {
+                    bomberCard.innerHTML = `<div class="status-title">炸彈客位置</div><div class="status-content">房間 ${bomber.room}</div>`;
+                    bomberCard.className = 'status-card';
+                } else {
+                    bomberCard.innerHTML = '<div class="status-title">炸彈客位置</div><div class="status-content">未找到</div>';
+                    bomberCard.className = 'status-card neutral';
+                }
+
+                // 判定勝負
+                if (president && bomber) {
+                    gameStateRef.once('value', (stateSnapshot) => {
+                        const gameState = stateSnapshot.val();
+                        const blueShared = gameState?.blueCardShared || false;
+                        const redShared = gameState?.redCardShared || false;
+
+                        /* 遊戲邏輯重新梳理：
+                         * 紅隊勝利：
+                         *   1. 炸彈完成 AND 總統與炸彈客同房間（炸死總統）
+                         *   2. 總統未治療 AND 炸彈完成（總統心臟病發）
+                         * 藍隊勝利：
+                         *   1. 總統治療完成 AND (炸彈未完成 OR 不同房間)
+                         * 雙輸：
+                         *   1. 總統未治療 AND 炸彈未完成
+                         */
+
+                        if (redShared && president.room === bomber.room) {
+                            // 情況1：紅隊勝利 - 炸彈完成且總統與炸彈客同房間（炸死總統）
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">❤️ 紅隊勝利！<br><small>（炸彈爆炸，總統被炸死）</small></div>';
+                            resultCard.className = 'status-card lose';
+                        } else if (blueShared && redShared && president.room !== bomber.room) {
+                            // 情況2：藍隊勝利 - 總統治療完成且炸彈完成但不同房間
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">💙 藍隊勝利！<br><small>（總統治療完成且未被炸）</small></div>';
+                            resultCard.className = 'status-card win';
+                        } else if (blueShared && !redShared) {
+                            // 情況3：藍隊勝利 - 總統治療完成且炸彈未完成
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">💙 藍隊勝利！<br><small>（總統治療完成，炸彈無效）</small></div>';
+                            resultCard.className = 'status-card win';
+                        } else if (!blueShared && redShared) {
+                            // 情況4：紅隊勝利 - 總統未治療（心臟病發）
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">❤️ 紅隊勝利！<br><small>（總統心臟病發死亡）</small></div>';
+                            resultCard.className = 'status-card lose';
+                        } else if (!blueShared && !redShared) {
+                            // 情況5：雙輸 - 雙方都未完成任務
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">⚖️ 雙輸<br><small>（總統未治療且炸彈無效）</small></div>';
+                            resultCard.className = 'status-card neutral';
+                        } else {
+                            // 其他情況（理論上不應該發生）
+                            resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">進行中...</div>';
+                            resultCard.className = 'status-card';
+                        }
+                    });
+                } else {
+                    resultCard.innerHTML = '<div class="status-title">🏆 遊戲結果</div><div class="status-content">等待開始</div>';
+                    resultCard.className = 'status-card neutral';
+                }
+            });
+        }
+
+        /* ## Firebase 即時監聽 - 當資料庫有任何變更時自動更新介面 */
+        playersRef.on('value', (snapshot) => {
+            renderPlayers();
+        });
+
+        /* ## 遊戲狀態監聽 - 監聽遊戲開始時間、卡片分享狀態、賭徒賭注 */
+        gameStateRef.on('value', (snapshot) => {
+            const gameState = snapshot.val();
+            if (gameState) {
+                if (gameState.startTime) {
+                    startTime = gameState.startTime;
+                    if (!timerInterval) {
+                        startTimer();
+                    }
+                }
+                
+                // 更新卡片分享狀態
+                document.getElementById('blueCardShare').checked = gameState.blueCardShared || false;
+                document.getElementById('redCardShare').checked = gameState.redCardShared || false;
+                
+                // 更新賭徒賭注
+                document.getElementById('gamblerBet').value = gameState.gamblerBet || '';
+                
+                updateGameStatus();
+            }
+        });
+
+        /* ## 頁面載入時初始化 - 當頁面載入完成時執行初始渲染 */
+        window.onload = function() {
+            renderPlayers();
+        };
+    </script>
+</body>
+</html>
